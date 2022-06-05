@@ -5,37 +5,38 @@ const { BadRequestError } = require('../errors/BadRequestError');
 const { NotFoundError } = require('../errors/NotFoundError');
 const { ConflictError } = require('../errors/ConflictError');
 
-module.exports.createUser = (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    next(new BadRequestError('Неправильный логин или пароль.'));
-  }
-
-  return User.findOne({ email }).then((user) => {
+module.exports.createUser = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!email || !password) {
+      next(new BadRequestError('Неправильный логин или пароль.'));
+    }
+    if (!name) {
+      next(new BadRequestError('Введите имя.'));
+    }
+    const user = await User.findOne({ email });
     if (user) {
       next(new ConflictError(`Пользователь с ${email} уже существует.`));
     }
 
-    return bcrypt.hash(password, 10);
-  })
-    .then((hash) => User.create({
+    const hash = await bcrypt.hash(password, 10);
+    const newUser = await User.create({
       email,
       password: hash,
-      name: req.body.name
-    }))
-    .then((user) => res.status(200).send({
-      name: user.name,
-      _id: user._id,
-      email: user.email
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы неверные данные.'));
-      }
-      return next(err);
-    })
-}
+      name: req.body.name,
+    });
+    return res.status(200).send({
+      name: newUser.name,
+      _id: newUser._id,
+      email: newUser.email,
+    });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      next(new BadRequestError('Переданы неверные данные.'));
+    }
+    return next(err);
+  }
+};
 
 module.exports.login = async (req, res, next) => {
   try {
@@ -54,8 +55,9 @@ module.exports.login = async (req, res, next) => {
       );
       return res.send({ token });
     }
+    return res.status(201).send('Вы авторизованы.');
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -63,15 +65,16 @@ module.exports.getCurrentUser = async (req, res, next) => {
   try {
     const { _id } = req.user;
     const currentUser = await User.findById(_id);
-    console.log(currentUser)
     if (!currentUser) {
       return next(new NotFoundError('Пользователь не найден.'));
     }
-    res.status(200)
-    res.send(currentUser.name, currentUser.email);
+    return res.status(200).send({
+      name: currentUser.name,
+      email: currentUser.email,
+    });
   } catch (err) {
-      next(err);
-  };
+    return next(err);
+  }
 };
 
 module.exports.updateUser = async (req, res, next) => {
@@ -82,11 +85,14 @@ module.exports.updateUser = async (req, res, next) => {
       { name, email },
       { new: true, runValidators: true },
     );
-    return res.status(200).send(user.name, user.email)
+    return res.status(200).send({
+      name: user.name,
+      email: user.email,
+    });
   } catch (err) {
     if (err.name === 'ValidationError') {
-        next(new BadRequestError('Неверный тип данных.'));
-      }
-      return next(err);
-  };
+      next(new BadRequestError('Неверный тип данных.'));
+    }
+    return next(err);
+  }
 };

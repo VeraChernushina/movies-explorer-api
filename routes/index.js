@@ -1,13 +1,15 @@
-const express = require('express');
-const router = express.Router();
+const router = require('express').Router();
 const NotFoundError = require('../errors/NotFoundError');
-
 const { createUser, login } = require('../controllers/users');
-
+const {
+  signUp,
+  signIn,
+} = require('../middlewares/validations');
 const auth = require('../middlewares/auth');
 
-router.post('/signup', createUser);
-router.post('/signin', login);
+// auth routes
+router.post('/signup', signUp, createUser);
+router.post('/signin', signIn, login);
 
 // crash-test route
 router.get('/crash-test', () => {
@@ -18,11 +20,11 @@ router.get('/crash-test', () => {
 
 // protected routes
 router.use(auth);
-router.use('/', require('../routes/users'));
-router.use('/', require('../routes/movies'));
+router.use('/', require('./users'));
+router.use('/', require('./movies'));
 
 // if request route does not exist
-router.use('*', (req, res, next) => {
+router.use((req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
