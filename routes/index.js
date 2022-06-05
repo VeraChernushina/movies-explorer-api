@@ -7,16 +7,16 @@ const {
 } = require('../middlewares/validations');
 const auth = require('../middlewares/auth');
 
-// auth routes
-router.post('/signup', signUp, createUser);
-router.post('/signin', signIn, login);
-
 // crash-test route
 router.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
+
+// auth routes
+router.post('/signup', signUp, createUser);
+router.post('/signin', signIn, login);
 
 // protected routes
 router.use(auth);
