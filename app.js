@@ -1,7 +1,13 @@
 const express = require('express');
+const helmet = require('helmet');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
+const router = require('./routes');
+const errorHandler = require('./middlewares/errorHandler');
 
-const { PORT = 3005 } = process.env;
+
+const { PORT = 3000 } = process.env;
 const app = express();
 
 mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb', {
@@ -9,9 +15,15 @@ mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb', {
   useUnifiedTopology: true,
 });
 
-app.use('/', require('./routes/users'));
-app.use('/', require('./routes/movies'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(helmet());
+app.use(router);
+
+app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log('Server is started at port 3005');
+  console.log('Server is started at port 3000');
 });
