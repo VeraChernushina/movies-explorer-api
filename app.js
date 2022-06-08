@@ -5,17 +5,19 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const {
-  MONGO_SERVER,
-} = require('./utils/utils');
+  PORT,
+  NODE_ENV,
+  MONGO_URL,
+  MONGO_URL_DEV
+} = require('./utils/constants');
 const router = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { limiter } = require('./utils/rateLimiter');
 
-const { PORT = 3000 } = process.env;
 const app = express();
 
-mongoose.connect(MONGO_SERVER, {
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
