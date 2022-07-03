@@ -48,7 +48,13 @@ module.exports.login = async (req, res, next) => {
           expiresIn: '7d',
         },
       );
-      return res.send({ token });
+      res.cookie('jwt', token, {
+        httpOnly: true,
+        maxAge: 6.048e+8,
+        sameSite: 'none',
+        secure: true,
+      })
+      return res.send({ message: 'Token was saved in the cookies.' });
     }
     return res.status(201).send('Вы авторизованы.');
   } catch (err) {
@@ -90,4 +96,8 @@ module.exports.updateUser = async (req, res, next) => {
     }
     return next(err);
   }
+};
+
+module.exports.logout = (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Token was deleted from cookies.' });
 };
