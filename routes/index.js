@@ -17,12 +17,13 @@ router.get('/crash-test', () => {
 // auth routes
 router.post('/signup', signUp, createUser);
 router.post('/signin', signIn, login);
-router.post('/signout', logout);
 
 // protected routes
 router.use(auth);
 router.use('/', require('./users'));
 router.use('/', require('./movies'));
+
+router.post('/signout', logout);
 
 // if request route does not exist
 router.use((req, res, next) => {
