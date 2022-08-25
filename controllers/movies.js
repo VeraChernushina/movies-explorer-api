@@ -70,7 +70,7 @@ module.exports.deleteMovie = async (req, res, next) => {
     if (!deletedMovie) {
       return next(new NotFoundError('Фильм не найден.'));
     }
-    return res.status(200).send('Фильм успешно удален!');
+    return res.status(200).send(deletedMovie);
   } catch (err) {
     return next(err);
   }
