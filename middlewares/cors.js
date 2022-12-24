@@ -1,6 +1,6 @@
 const allowedCors = [
-  'http://diploma.chernushina.nomoredomains.xyz',
-  'https://diploma.chernushina.nomoredomains.xyz',
+  'http://movies-explorer-frontend-nu.vercel.app/',
+  'https://movies-explorer-frontend-nu.vercel.app/',
   'http://localhost:3000',
   'https://localhost:3000',
 ];
